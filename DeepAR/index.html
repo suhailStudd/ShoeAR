@@ -1,49 +1,51 @@
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-  <!-- Load deepar.js -->
-  <script src="https://cdn.jsdelivr.net/npm/deepar/js/deepar.js"> </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/deepar/js/deepar.js"></script>
 </head>
-
 <body>
-  <!-- Canvas element for AR preview -->
   <canvas width="640" height="360" id="deepar-canvas"></canvas>
-  <!-- Initialize DeepAR and load AR effect/filter -->
-  <script>  
+  <script>
     (async function() {
+      const canvas = document.getElementById("deepar-canvas");
+      const resizeCanvas = () => {
+        canvas.width = window.innerWidth > window.innerHeight
+          ? Math.floor(window.innerHeight * 0.66)
+          : window.innerWidth;
+        canvas.height = window.innerHeight;
+      };
+      resizeCanvas();
+      window.addEventListener("resize", resizeCanvas);
 
-// Resize the canvas according to screen size.
-const canvas = document.getElementById('deepar-canvas');
-canvas.width = window.innerWidth > window.innerHeight ? Math.floor(window.innerHeight * 0.66) : window.innerWidth;
-canvas.height = window.innerHeight;
+      try {
+        const deepAR = await deepar.initialize({
+          licenseKey: "0d4c97008d7c059b9c3f087f79f04c9fc54b5774c5d54e3567f769a906d8d92bf4fbf0920209dd5c",
+          canvas,
+          effect: "../Effects/airforceeffect.deepar",
+          additionalOptions: {
+            cameraConfig: {
+              facingMode: "environment",
+            },
+            hint: "footInit",
+          },
+        });
 
-// Initialize DeepAR.
-const deepAR = await deepar.initialize({
-  licenseKey: '0d4c97008d7c059b9c3f087f79f04c9fc54b5774c5d54e3567f769a906d8d92bf4fbf0920209dd5c',
-  canvas: canvas,
-  effect: '/Effects/airforceeffect.deepar', // The shoe-try-on effect file.
-  additionalOptions: {
-    // Use the front camera.
-    cameraConfig: {
-      facingMode: "environment",
-    },
-    hint: "footInit", // Add this hint to let DeepAR know we want to optimize for shoe-try-on use-case.
-  }
-});
+        const loader = document.getElementById("loader-wrapper");
+        if (loader) loader.style.display = "none";
 
-// Hide the loading screen.
-document.getElementById("loader-wrapper").style.display = "none";
-
-// Register for a collback that lets you know when feet are detected.
-deepAR.callbacks.onFeetTracked = (leftFoot, rightFoot) => {
-  const feetText = document.getElementById("feet-text");
-  // Hide the text when the feet are first detected.
-  if(leftFoot.detected || rightFoot.detected) {
-    feetText.style.display = "none";
-    deepAR.callbacks.onFeetTracked = undefined; // Unregister from the callback.
-  }
-};
-
-})();
+        deepAR.callbacks.onFeetTracked = (leftFoot, rightFoot) => {
+          const feetText = document.getElementById("feet-text");
+          if ((leftFoot && leftFoot.detected) || (rightFoot && rightFoot.detected)) {
+            if (feetText) feetText.style.display = "none";
+            deepAR.callbacks.onFeetTracked = undefined;
+          }
+        };
+      } catch (error) {
+        console.error("DeepAR initialization failed:", error);
+      }
+    })();
   </script>
 </body>
 </html>
