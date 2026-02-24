@@ -60,6 +60,18 @@
 
     <script src="js/script.js"></script>
     <script>
+        (function handleAppFallback() {
+            if (window.location.hash === "#app-not-found") {
+                alert("App not found. Confirm installed package: com.unity.arfoundation.samples");
+
+                if (window.history && window.history.replaceState) {
+                    window.history.replaceState(null, "", window.location.pathname + window.location.search);
+                } else {
+                    window.location.hash = "";
+                }
+            }
+        })();
+
         function openAndroidApp() {
             var packageName = "com.unity.arfoundation.samples";
             var isAndroid = /Android/i.test(navigator.userAgent || "");
@@ -69,24 +81,14 @@
                 return;
             }
 
-            var intentUrl = "intent://launch#Intent;package=" + packageName + ";action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;end";
-            var appOpened = false;
-
-            var onVisibilityChange = function () {
-                if (document.hidden) {
-                    appOpened = true;
-                    clearTimeout(installCheck);
-                    document.removeEventListener("visibilitychange", onVisibilityChange);
-                }
-            };
-
-            document.addEventListener("visibilitychange", onVisibilityChange);
-
-            var installCheck = setTimeout(function () {
-                if (!appOpened) {
-                    alert("App not found. Install the test build: " + packageName);
-                }
-            }, 1500);
+            var fallbackUrl = encodeURIComponent(window.location.href.split("#")[0] + "#app-not-found");
+            var intentUrl =
+                "intent:#Intent;" +
+                "action=android.intent.action.MAIN;" +
+                "category=android.intent.category.LAUNCHER;" +
+                "package=" + packageName + ";" +
+                "S.browser_fallback_url=" + fallbackUrl + ";" +
+                "end";
 
             window.location.href = intentUrl;
         }
