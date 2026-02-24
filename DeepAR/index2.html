@@ -52,20 +52,50 @@
       window.addEventListener("resize", resizeCanvas);
 
       try {
-        const deepAR = await deepar.initialize({
+        const baseConfig = {
           licenseKey: "0d4c97008d7c059b9c3f087f79f04c9fc54b5774c5d54e3567f769a906d8d92bf4fbf0920209dd5c",
           canvas,
           effect: "../Effects/godfinaleffect.deepar",
           additionalOptions: {
-            cameraConfig: {
-              facingMode: { ideal: "environment" },
-              width: { ideal: 640 },
-              height: { ideal: 480 },
-              resizeMode: "none",
-            },
             hint: "footInit",
           },
-        });
+        };
+
+        const initializeWithCameraConfig = (cameraConfig) =>
+          deepar.initialize({
+            ...baseConfig,
+            additionalOptions: {
+              ...baseConfig.additionalOptions,
+              cameraConfig,
+            },
+          });
+
+        let deepAR;
+        try {
+          deepAR = await initializeWithCameraConfig({
+            facingMode: { exact: "environment" },
+            width: { ideal: 640 },
+            height: { ideal: 480 },
+            resizeMode: "none",
+          });
+        } catch (cameraError) {
+          const isFacingModeConstraintError =
+            cameraError &&
+            (cameraError.name === "OverconstrainedError" ||
+              cameraError.name === "ConstraintNotSatisfiedError" ||
+              cameraError.name === "NotFoundError");
+
+          if (!isFacingModeConstraintError) {
+            throw cameraError;
+          }
+
+          deepAR = await initializeWithCameraConfig({
+            facingMode: { ideal: "environment" },
+            width: { ideal: 640 },
+            height: { ideal: 480 },
+            resizeMode: "none",
+          });
+        }
 
         const loader = document.getElementById("loader-wrapper");
         if (loader) loader.style.display = "none";
