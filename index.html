@@ -62,7 +62,7 @@
     <script>
         (function handleAppFallback() {
             if (window.location.hash === "#app-not-found") {
-                alert("App not found. Confirm installed package: com.unity.arfoundation.samples");
+                alert("App not found. Confirm manifest + installed build use: myshoeapp://open");
 
                 if (window.history && window.history.replaceState) {
                     window.history.replaceState(null, "", window.location.pathname + window.location.search);
@@ -74,6 +74,8 @@
 
         function openAndroidApp() {
             var packageName = "com.unity.arfoundation.samples";
+            var activityName = "com.unity3d.player.UnityPlayerActivity";
+            var deepLinkUrl = "myshoeapp://open";
             var isAndroid = /Android/i.test(navigator.userAgent || "");
 
             if (!isAndroid) {
@@ -83,14 +85,32 @@
 
             var fallbackUrl = encodeURIComponent(window.location.href.split("#")[0] + "#app-not-found");
             var intentUrl =
-                "intent:#Intent;" +
-                "action=android.intent.action.MAIN;" +
-                "category=android.intent.category.LAUNCHER;" +
+                "intent://open#Intent;" +
+                "scheme=myshoeapp;" +
+                "action=android.intent.action.VIEW;" +
+                "category=android.intent.category.BROWSABLE;" +
                 "package=" + packageName + ";" +
+                "component=" + packageName + "/" + activityName + ";" +
                 "S.browser_fallback_url=" + fallbackUrl + ";" +
                 "end";
 
-            window.location.href = intentUrl;
+            var appOpened = false;
+            var onVisibilityChange = function () {
+                if (document.hidden) {
+                    appOpened = true;
+                    document.removeEventListener("visibilitychange", onVisibilityChange);
+                }
+            };
+
+            document.addEventListener("visibilitychange", onVisibilityChange);
+
+            setTimeout(function () {
+                if (!appOpened) {
+                    window.location.href = intentUrl;
+                }
+            }, 400);
+
+            window.location.href = deepLinkUrl;
         }
     </script>
 </body>
