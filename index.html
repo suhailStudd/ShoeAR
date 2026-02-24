@@ -62,16 +62,31 @@
     <script>
         function openAndroidApp() {
             var packageName = "com.unity.arfoundation.samples";
+            var isAndroid = /Android/i.test(navigator.userAgent || "");
+
+            if (!isAndroid) {
+                alert("Please open this page on an Android phone.");
+                return;
+            }
+
             var intentUrl = "intent://launch#Intent;package=" + packageName + ";action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;end";
-            var playStoreUrl = "https://play.google.com/store/apps/details?id=" + packageName;
+            var appOpened = false;
 
-            var fallback = setTimeout(function () {
-                window.location.href = playStoreUrl;
+            var onVisibilityChange = function () {
+                if (document.hidden) {
+                    appOpened = true;
+                    clearTimeout(installCheck);
+                    document.removeEventListener("visibilitychange", onVisibilityChange);
+                }
+            };
+
+            document.addEventListener("visibilitychange", onVisibilityChange);
+
+            var installCheck = setTimeout(function () {
+                if (!appOpened) {
+                    alert("App not found. Install the test build: " + packageName);
+                }
             }, 1500);
-
-            window.addEventListener("blur", function () {
-                clearTimeout(fallback);
-            }, { once: true });
 
             window.location.href = intentUrl;
         }
