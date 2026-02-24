@@ -25,6 +25,7 @@
                     <h3>Nike Metcon Shoes</h3>
                     <p>View the shoe and open live foot try-on.</p>
                     <a href="DeepAR/index.html" class="btn">Try On</a>
+                    <button type="button" class="btn" onclick="openAndroidApp()">Open Android App</button>
                 </div>
                 <div class="image">
                     <img src="img/slide/nikeshoes.png" class="shoe" alt="Nike Metcon">
@@ -39,6 +40,7 @@
                     <h3>Blue Nike Shoes</h3>
                     <p>View the shoe and open live foot try-on.</p>
                     <a href="DeepAR/index2.html" class="btn">Try On</a>
+                    <button type="button" class="btn" onclick="openAndroidApp()">Open Android App</button>
                 </div>
                 <div class="image">
                     <img src="img/slide/bluenike.png" class="shoe" alt="Blue Nike">
@@ -50,18 +52,29 @@
         <div id="next" class="fa fa-angle-right" onclick="next();"></div>
     </section>
 
+    <section class="cridet" id="cridet">
+        <div class="box">
+            <h3>@STUDD GAMES</h3>
+        </div>
+    </section>
+
     <script src="js/script.js"></script>
+    <script>
+        function openAndroidApp() {
+            var packageName = "com.unity.arfoundation.samples";
+            var intentUrl = "intent://launch#Intent;package=" + packageName + ";action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;end";
+            var playStoreUrl = "https://play.google.com/store/apps/details?id=" + packageName;
+
+            var fallback = setTimeout(function () {
+                window.location.href = playStoreUrl;
+            }, 1500);
+
+            window.addEventListener("blur", function () {
+                clearTimeout(fallback);
+            }, { once: true });
+
+            window.location.href = intentUrl;
+        }
+    </script>
 </body>
 </html>
-
-        </section>
-        <!--end news-->
-        <section class="cridet" id="cridet">
-            <div class="box">
-                <h3>@STUDD GAMES</h3>
-            </div>
-        </section>
-    </body>
-</html>
-
-<script src="js/script.js"></script>
