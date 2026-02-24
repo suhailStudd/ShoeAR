@@ -4,6 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.jsdelivr.net/npm/deepar/js/deepar.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+    }
+
+    #deepar-canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
 </head>
 <body>
   <canvas width="640" height="360" id="deepar-canvas"></canvas>
@@ -11,9 +26,7 @@
     (async function() {
       const canvas = document.getElementById("deepar-canvas");
       const resizeCanvas = () => {
-        canvas.width = window.innerWidth > window.innerHeight
-          ? Math.floor(window.innerHeight * 0.66)
-          : window.innerWidth;
+        canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
       };
       resizeCanvas();
@@ -27,6 +40,9 @@
           additionalOptions: {
             cameraConfig: {
               facingMode: "environment",
+              aspectRatio: window.innerWidth / window.innerHeight,
+              width: { ideal: window.innerWidth },
+              height: { ideal: window.innerHeight },
             },
             hint: "footInit",
           },
@@ -49,4 +65,3 @@
   </script>
 </body>
 </html>
-
