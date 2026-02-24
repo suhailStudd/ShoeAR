@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shoe AR Try-On</title>
+    <link rel="stylesheet" href="font-awesome/css/font-awesome.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <div id="menu-bar" class="fa fa-bars"></div>
+        <img src="img/logo.png" class="logo" alt="Shoe AR">
+        <nav class="navbar">
+            <a href="#home">Home</a>
+            <a href="#home">Try On</a>
+        </nav>
+    </header>
+
+    <section class="home" id="home">
+        <div class="slide-container active">
+            <div class="slide">
+                <div class="content">
+                    <span>Nike Sport Shoes</span>
+                    <h3>Nike Metcon Shoes</h3>
+                    <p>View the shoe and open live foot try-on.</p>
+                    <a href="DeepAR/index.html" class="btn">Try On</a>
+                    <button type="button" class="btn" onclick="openAndroidApp()">Open Android App</button>
+                </div>
+                <div class="image">
+                    <img src="img/slide/nikeshoes.png" class="shoe" alt="Nike Metcon">
+                </div>
+            </div>
+        </div>
+
+        <div class="slide-container">
+            <div class="slide">
+                <div class="content">
+                    <span>Nike Sport Shoes</span>
+                    <h3>Blue Nike Shoes</h3>
+                    <p>View the shoe and open live foot try-on.</p>
+                    <a href="DeepAR/index2.html" class="btn">Try On</a>
+                    <button type="button" class="btn" onclick="openAndroidApp()">Open Android App</button>
+                </div>
+                <div class="image">
+                    <img src="img/slide/bluenike.png" class="shoe" alt="Blue Nike">
+                </div>
+            </div>
+        </div>
+
+        <div id="prev" class="fa fa-angle-left" onclick="prev();"></div>
+        <div id="next" class="fa fa-angle-right" onclick="next();"></div>
+    </section>
+
+    <section class="cridet" id="cridet">
+        <div class="box">
+            <h3>@STUDD GAMES</h3>
+        </div>
+    </section>
+
+    <script src="js/script.js"></script>
+    <script>
+        (function handleAppFallback() {
+            if (window.location.hash === "#app-not-found") {
+                alert("App not found. Confirm manifest + installed build use: myshoeapp://open");
+
+                if (window.history && window.history.replaceState) {
+                    window.history.replaceState(null, "", window.location.pathname + window.location.search);
+                } else {
+                    window.location.hash = "";
+                }
+            }
+        })();
+
+        function openAndroidApp() {
+            var packageName = "com.unity.arfoundation.samples";
+            var activityName = "com.unity3d.player.UnityPlayerActivity";
+            var deepLinkUrl = "myshoeapp://open";
+            var isAndroid = /Android/i.test(navigator.userAgent || "");
+
+            if (!isAndroid) {
+                alert("Please open this page on an Android phone.");
+                return;
+            }
+
+            var fallbackUrl = encodeURIComponent(window.location.href.split("#")[0] + "#app-not-found");
+            var intentUrl =
+                "intent://open#Intent;" +
+                "scheme=myshoeapp;" +
+                "action=android.intent.action.VIEW;" +
+                "category=android.intent.category.BROWSABLE;" +
+                "package=" + packageName + ";" +
+                "component=" + packageName + "/" + activityName + ";" +
+                "S.browser_fallback_url=" + fallbackUrl + ";" +
+                "end";
+
+            var appOpened = false;
+            var onVisibilityChange = function () {
+                if (document.hidden) {
+                    appOpened = true;
+                    document.removeEventListener("visibilitychange", onVisibilityChange);
+                }
+            };
+
+            document.addEventListener("visibilitychange", onVisibilityChange);
+
+            setTimeout(function () {
+                if (!appOpened) {
+                    window.location.href = intentUrl;
+                }
+            }, 400);
+
+            window.location.href = deepLinkUrl;
+        }
+    </script>
+</body>
+</html>
