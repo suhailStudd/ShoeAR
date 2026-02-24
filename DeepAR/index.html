@@ -13,10 +13,16 @@
       background: #000;
     }
 
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     #deepar-canvas {
       display: block;
-      width: 100vw;
-      height: 100vh;
+      max-width: 100%;
+      max-height: 100%;
     }
   </style>
 </head>
@@ -26,8 +32,21 @@
     (async function() {
       const canvas = document.getElementById("deepar-canvas");
       const resizeCanvas = () => {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        // Keep a 3:4 portrait frame to avoid camera crop/zoom on most phones.
+        const targetAspect = 3 / 4;
+        let cssWidth = window.innerWidth;
+        let cssHeight = Math.floor(cssWidth / targetAspect);
+
+        if (cssHeight > window.innerHeight) {
+          cssHeight = window.innerHeight;
+          cssWidth = Math.floor(cssHeight * targetAspect);
+        }
+
+        const dpr = window.devicePixelRatio || 1;
+        canvas.style.width = cssWidth + "px";
+        canvas.style.height = cssHeight + "px";
+        canvas.width = Math.floor(cssWidth * dpr);
+        canvas.height = Math.floor(cssHeight * dpr);
       };
       resizeCanvas();
       window.addEventListener("resize", resizeCanvas);
@@ -39,10 +58,10 @@
           effect: '../Effects/airforceeffect.deepar',
           additionalOptions: {
             cameraConfig: {
-              facingMode: "environment",
-              aspectRatio: window.innerWidth / window.innerHeight,
-              width: { ideal: window.innerWidth },
-              height: { ideal: window.innerHeight },
+              facingMode: { ideal: "environment" },
+              width: { ideal: 640 },
+              height: { ideal: 480 },
+              resizeMode: "none",
             },
             hint: "footInit",
           },
