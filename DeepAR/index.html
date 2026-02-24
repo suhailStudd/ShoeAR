@@ -11,59 +11,44 @@
   <!-- Canvas element for AR preview -->
   <canvas width="640" height="360" id="deepar-canvas"></canvas>
   <!-- Initialize DeepAR and load AR effect/filter -->
-  <script>
-    (async function() {
-      // Resize the canvas according to the viewport.
-      const canvas = document.getElementById("deepar-canvas");
-      const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 640;
-      const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 360;
-      canvas.width = viewportWidth > viewportHeight ? Math.floor(viewportHeight * 0.66) : viewportWidth;
-      canvas.height = viewportHeight;
+<script>
+  (async function() {
+    const canvas = document.getElementById("deepar-canvas");
+    const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 640;
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 360;
+    canvas.width = viewportWidth > viewportHeight ? Math.floor(viewportHeight * 0.66) : viewportWidth;
+    canvas.height = viewportHeight;
 
-      const effectUrl = new URL("../Effects/airforceeffect.deepar", window.location.href).toString();
+    const effectUrl = new URL("../Effects/airforceeffect.deepar", window.location.href).toString();
 
-      try {
-        const initWithCamera = (cameraConfig) =>
-          deepar.initialize({
-            licenseKey: "0d4c97008d7c059b9c3f087f79f04c9fc54b5774c5d54e3567f769a906d8d92bf4fbf0920209dd5c",
-            canvas: canvas,
-            effect: effectUrl, // The shoe-try-on effect file.
-            additionalOptions: {
-              cameraConfig: cameraConfig,
-              hint: "footInit", // Optimize for shoe try-on.
-            },
-          });
+    try {
+      const deepAR = await deepar.initialize({
+        licenseKey: "0d4c97008d7c059b9c3f087f79f04c9fc54b5774c5d54e3567f769a906d8d92bf4fbf0920209dd5c",
+        canvas: canvas,
+        effect: effectUrl,
+        additionalOptions: {
+          cameraConfig: {
+            facingMode: "environment", // ✅ Simple string, no "exact" wrapper
+          },
+          hint: "footInit",
+        },
+      });
 
-        // Try to lock to rear camera first.
-        let deepAR;
-        try {
-          deepAR = await initWithCamera({ facingMode: { exact: "environment" } });
-        } catch (cameraError) {
-          console.warn("Rear camera exact match failed, retrying with environment preference.", cameraError);
-          deepAR = await initWithCamera({ facingMode: "environment" });
+      const loader = document.getElementById("loader-wrapper");
+      if (loader) loader.style.display = "none";
+
+      deepAR.callbacks.onFeetTracked = (leftFoot, rightFoot) => {
+        const feetText = document.getElementById("feet-text");
+        if (leftFoot.detected || rightFoot.detected) {
+          if (feetText) feetText.style.display = "none";
+          deepAR.callbacks.onFeetTracked = undefined;
         }
-
-        // Hide the loading screen if present.
-        const loader = document.getElementById("loader-wrapper");
-        if (loader) {
-          loader.style.display = "none";
-        }
-
-        // Register a callback that lets you know when feet are detected.
-        deepAR.callbacks.onFeetTracked = (leftFoot, rightFoot) => {
-          const feetText = document.getElementById("feet-text");
-          if (leftFoot.detected || rightFoot.detected) {
-            if (feetText) {
-              feetText.style.display = "none";
-            }
-            deepAR.callbacks.onFeetTracked = undefined; // Unregister from the callback.
-          }
-        };
-      } catch (error) {
-        console.error("DeepAR initialization failed:", error);
-      }
-    })();
-  </script>
+      };
+    } catch (error) {
+      console.error("DeepAR initialization failed:", error);
+    }
+  })();
+</script>
 </body>
 </html>
 
